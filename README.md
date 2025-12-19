@@ -96,8 +96,7 @@ base: '/blog/',  // 如果仓库名不是 username.github.io，需要设置 base
 
 **详细配置步骤请查看：**
 - **[START_HERE.md](./START_HERE.md)** - 快速开始指南（推荐）
-- **[QUICK_START_OAUTH.md](./QUICK_START_OAUTH.md)** - 详细配置步骤
-- **[OAUTH_CHECKLIST.md](./OAUTH_CHECKLIST.md)** - 配置检查清单
+- **[ADMIN_TROUBLESHOOTING.md](./ADMIN_TROUBLESHOOTING.md)** - 问题排查指南
 
 **快速步骤：**
 

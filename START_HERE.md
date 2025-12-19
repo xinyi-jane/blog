@@ -100,7 +100,6 @@ git push origin main
 
 ## 📚 需要帮助？
 
-- 查看 `QUICK_START_OAUTH.md` 获取详细步骤
-- 查看 `OAUTH_CHECKLIST.md` 检查是否遗漏了什么
-- 查看 `ADMIN_TROUBLESHOOTING.md` 排查问题
+- 查看 [ADMIN_TROUBLESHOOTING.md](./ADMIN_TROUBLESHOOTING.md) 排查问题
+- 查看 [README.md](./README.md) 了解完整项目信息
 
