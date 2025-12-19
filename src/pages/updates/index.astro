@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
+const base = import.meta.env.BASE_URL;
 const allUpdates = await getCollection('updates', ({ data }) => !data.draft);
 
 const sortedUpdates = allUpdates.sort((a, b) => 
@@ -60,7 +61,7 @@ const renderedUpdates = await Promise.all(
                   <div class="mt-5 grid grid-cols-2 md:grid-cols-3 gap-3">
                     {update.data.images.map((img) => (
                       <div class="overflow-hidden rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                        <img src={img} alt="" class="w-full h-48 object-cover hover:scale-105 transition-transform duration-300" />
+                        <img src={img.startsWith('http') ? img : `${base}${img.replace(/^\//, '')}`} alt="" class="w-full h-48 object-cover hover:scale-105 transition-transform duration-300" />
                       </div>
                     ))}
                   </div>

@@ -40,7 +40,7 @@ const nextPost = currentIndex < sortedPosts.length - 1 ? sortedPosts[currentInde
   <article class="bg-white/70 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-sm">
     {post.data.cover && (
       <div class="mb-8 rounded-xl overflow-hidden shadow-md">
-        <img src={post.data.cover} alt={post.data.title} class="w-full h-64 md:h-96 object-cover" />
+        <img src={post.data.cover.startsWith('http') ? post.data.cover : `${base}${post.data.cover.replace(/^\//, '')}`} alt={post.data.title} class="w-full h-64 md:h-96 object-cover" />
       </div>
     )}
     
@@ -74,7 +74,7 @@ const nextPost = currentIndex < sortedPosts.length - 1 ? sortedPosts[currentInde
         <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
           {post.data.gallery.map((img) => (
             <div class="overflow-hidden rounded-xl shadow-sm hover:shadow-md transition-shadow">
-              <img src={img} alt="" class="w-full h-48 object-cover hover:scale-105 transition-transform duration-300" />
+              <img src={img.startsWith('http') ? img : `${base}${img.replace(/^\//, '')}`} alt="" class="w-full h-48 object-cover hover:scale-105 transition-transform duration-300" />
             </div>
           ))}
         </div>

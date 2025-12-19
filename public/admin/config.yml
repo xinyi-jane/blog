@@ -17,7 +17,7 @@ backend:
 #   proxy_url: http://localhost:8081/api/v1
 
 media_folder: public/images
-public_folder: /images
+public_folder: /blog/images
 
 collections:
   - name: "posts"

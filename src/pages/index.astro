@@ -96,7 +96,7 @@ const workPosts = sortedPosts.filter(p => p.data.channel === 'work').slice(0, 3)
                   {update.data.images && update.data.images.length > 0 && (
                     <div class="mt-4 grid grid-cols-3 gap-3">
                       {update.data.images.slice(0, 3).map((img) => (
-                        <img src={img} alt="" class="w-full h-28 object-cover rounded-lg shadow-sm" />
+                        <img src={img.startsWith('http') ? img : `${base}${img.replace(/^\//, '')}`} alt="" class="w-full h-28 object-cover rounded-lg shadow-sm" />
                       ))}
                     </div>
                   )}
@@ -120,7 +120,7 @@ const workPosts = sortedPosts.filter(p => p.data.channel === 'work').slice(0, 3)
             <a href={`${base}${post.data.channel}/${post.slug}/`} class="group block bg-white/70 backdrop-blur-sm border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
               {post.data.cover && (
                 <div class="overflow-hidden">
-                  <img src={post.data.cover} alt={post.data.title} class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300" />
+                  <img src={post.data.cover.startsWith('http') ? post.data.cover : `${base}${post.data.cover.replace(/^\//, '')}`} alt={post.data.title} class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300" />
                 </div>
               )}
               <div class="p-6">
