@@ -1,9 +1,4 @@
 {
-  "functions": {
-    "api/auth.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
   "rewrites": [
     {
       "source": "/api/auth",
@@ -20,7 +15,7 @@
         },
         {
           "key": "Access-Control-Allow-Methods",
-          "value": "GET, POST, OPTIONS"
+          "value": "GET, OPTIONS"
         },
         {
           "key": "Access-Control-Allow-Headers",
