@@ -23,23 +23,102 @@
     #nc-root {
       min-height: 100vh;
     }
+    .debug-info {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 15px;
+      max-width: 400px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      font-size: 12px;
+      z-index: 9999;
+      display: none;
+    }
+    .debug-info.show {
+      display: block;
+    }
+    .debug-info h3 {
+      margin: 0 0 10px 0;
+      font-size: 14px;
+      color: #333;
+    }
+    .debug-info pre {
+      margin: 5px 0;
+      padding: 5px;
+      background: #f5f5f5;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 11px;
+    }
+    .debug-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      z-index: 10000;
+    }
   </style>
 </head>
 <body>
   <div id="nc-root" class="loading">正在加载内容管理系统...</div>
   
+  <!-- 调试信息面板 -->
+  <button class="debug-toggle" onclick="toggleDebug()" title="显示/隐藏调试信息">🔍</button>
+  <div id="debug-info" class="debug-info">
+    <h3>调试信息</h3>
+    <div id="debug-content"></div>
+  </div>
+  
   <!-- Include the script that builds the page and powers Decap CMS -->
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
   <script>
-    // 全局错误处理，捕获未处理的 Promise 错误
+    // 调试信息收集
+    const debugInfo = {
+      token: null,
+      cmsAvailable: false,
+      backend: null,
+      currentUser: null,
+      errors: []
+    };
+    
+    function updateDebugInfo() {
+      const content = document.getElementById('debug-content');
+      if (!content) return;
+      
+      let html = '<pre>Token: ' + (debugInfo.token ? '✓ 已保存' : '✗ 未找到') + '</pre>';
+      html += '<pre>CMS Available: ' + (debugInfo.cmsAvailable ? '✓' : '✗') + '</pre>';
+      html += '<pre>Backend: ' + (debugInfo.backend ? debugInfo.backend : '未初始化') + '</pre>';
+      html += '<pre>Current User: ' + (debugInfo.currentUser ? JSON.stringify(debugInfo.currentUser, null, 2) : '未获取') + '</pre>';
+      if (debugInfo.errors.length > 0) {
+        html += '<pre style="color: red;">Errors: ' + debugInfo.errors.join(', ') + '</pre>';
+      }
+      content.innerHTML = html;
+    }
+    
+    function toggleDebug() {
+      const panel = document.getElementById('debug-info');
+      panel.classList.toggle('show');
+    }
+    
+    // 全局错误处理
     window.addEventListener('unhandledrejection', function(event) {
-      // 忽略 "message port closed" 错误，这通常是浏览器扩展引起的
       if (event.reason && event.reason.message && event.reason.message.includes('message port closed')) {
         event.preventDefault();
         console.warn('Ignored message port error (likely from browser extension)');
         return;
       }
-      // 其他错误正常处理
+      debugInfo.errors.push(event.reason ? event.reason.toString() : 'Unknown error');
+      updateDebugInfo();
       console.error('Unhandled promise rejection:', event.reason);
     });
     
@@ -53,85 +132,120 @@
       if (token) {
         console.log('Token found in URL, saving to localStorage...');
         
-        // Decap CMS 使用 localStorage 存储用户信息
-        // 格式：{ token: 'xxx', backend: 'github' }
         try {
           const userData = {
             token: token,
             backend: 'github'
           };
           
-          // 保存到 localStorage
           localStorage.setItem('netlify-cms-user', JSON.stringify(userData));
+          sessionStorage.setItem('netlify-cms-user', JSON.stringify(userData));
           console.log('Token saved to localStorage:', userData);
           
-          // 同时保存到 sessionStorage
-          sessionStorage.setItem('netlify-cms-user', JSON.stringify(userData));
+          debugInfo.token = token.substring(0, 20) + '...';
+          updateDebugInfo();
           
-          // 清除 URL 中的 token 参数
           const cleanUrl = window.location.pathname + (window.location.hash.split('?')[0] || '');
           window.history.replaceState({}, document.title, cleanUrl);
           
-          // 延迟刷新，确保 localStorage 已保存
           setTimeout(function() {
             window.location.reload();
           }, 100);
         } catch (e) {
           console.error('Failed to save token:', e);
+          debugInfo.errors.push('Failed to save token: ' + e.message);
+          updateDebugInfo();
         }
         return;
       }
       
-      // 检查是否已有保存的用户信息
+      // 检查已保存的用户信息
       const savedUser = localStorage.getItem('netlify-cms-user');
       if (savedUser) {
         try {
           const userData = JSON.parse(savedUser);
           if (userData.token) {
             console.log('Found saved token in localStorage:', userData);
+            debugInfo.token = userData.token.substring(0, 20) + '...';
+            updateDebugInfo();
             
-            // 等待 Decap CMS 加载完成后，手动触发认证
-            // 使用多种方式确保 Decap CMS 已初始化
-            function tryAuthenticate() {
-              // 检查 Decap CMS 是否已初始化
+            // 等待并检查 Decap CMS
+            function checkCMS() {
               if (window.CMS) {
+                debugInfo.cmsAvailable = true;
+                updateDebugInfo();
+                
                 try {
                   const backend = window.CMS.getBackend();
-                  if (backend && backend.authenticate) {
-                    console.log('Attempting to authenticate with Decap CMS...');
-                    backend.authenticate().then(function() {
-                      console.log('Authentication successful');
-                      // 不自动刷新，让 Decap CMS 自然显示界面
-                    }).catch(function(err) {
-                      console.warn('Authentication check failed (this may be normal):', err);
-                    });
+                  if (backend) {
+                    debugInfo.backend = backend.name || 'Unknown';
+                    updateDebugInfo();
+                    
+                    // 尝试获取当前用户
+                    if (backend.currentUser) {
+                      backend.currentUser().then(function(user) {
+                        debugInfo.currentUser = user;
+                        updateDebugInfo();
+                        console.log('Current user:', user);
+                      }).catch(function(err) {
+                        console.warn('Failed to get current user:', err);
+                        debugInfo.errors.push('Get user error: ' + err.message);
+                        updateDebugInfo();
+                      });
+                    }
+                    
+                    // 尝试认证
+                    if (backend.authenticate) {
+                      backend.authenticate().then(function() {
+                        console.log('Authentication successful');
+                        // 重新获取用户信息
+                        if (backend.currentUser) {
+                          backend.currentUser().then(function(user) {
+                            debugInfo.currentUser = user;
+                            updateDebugInfo();
+                          });
+                        }
+                      }).catch(function(err) {
+                        console.warn('Authentication check failed:', err);
+                        debugInfo.errors.push('Auth error: ' + err.message);
+                        updateDebugInfo();
+                      });
+                    }
                   } else {
-                    console.log('Backend not ready yet, retrying...');
-                    setTimeout(tryAuthenticate, 500);
+                    setTimeout(checkCMS, 500);
                   }
                 } catch (e) {
                   console.warn('Error accessing backend:', e);
+                  debugInfo.errors.push('Backend access error: ' + e.message);
+                  updateDebugInfo();
+                  setTimeout(checkCMS, 500);
                 }
               } else {
-                // Decap CMS 还没加载，继续等待
-                setTimeout(tryAuthenticate, 500);
+                setTimeout(checkCMS, 500);
               }
             }
             
-            // 在页面加载完成后开始尝试
             if (document.readyState === 'complete') {
-              setTimeout(tryAuthenticate, 1000);
+              setTimeout(checkCMS, 1000);
             } else {
               window.addEventListener('load', function() {
-                setTimeout(tryAuthenticate, 1000);
+                setTimeout(checkCMS, 1000);
               });
             }
           }
         } catch (e) {
           console.error('Failed to parse saved user data:', e);
+          debugInfo.errors.push('Parse error: ' + e.message);
+          updateDebugInfo();
         }
+      } else {
+        debugInfo.errors.push('No token found in localStorage');
+        updateDebugInfo();
       }
     })();
+    
+    // 定期更新调试信息
+    setInterval(updateDebugInfo, 2000);
   </script>
 </body>
 </html>
