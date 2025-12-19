@@ -105,10 +105,13 @@
       content.innerHTML = html;
     }
     
-    function toggleDebug() {
+    // 将 toggleDebug 函数定义在全局作用域
+    window.toggleDebug = function() {
       const panel = document.getElementById('debug-info');
-      panel.classList.toggle('show');
-    }
+      if (panel) {
+        panel.classList.toggle('show');
+      }
+    };
     
     // 全局错误处理
     window.addEventListener('unhandledrejection', function(event) {
