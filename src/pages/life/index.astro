@@ -2,6 +2,8 @@
 import Layout from '../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 
+const base = import.meta.env.BASE_URL;
+
 const allPosts = await getCollection('posts', ({ data }) => 
   !data.draft && data.channel === 'life'
 );
@@ -31,7 +33,7 @@ const sortedPosts = allPosts.sort((a, b) =>
     ) : (
       <div class="grid md:grid-cols-2 gap-6">
         {sortedPosts.map((post) => (
-          <a href={`/life/${post.slug}`} class="group block bg-white/70 backdrop-blur-sm border border-mint-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+          <a href={`${base}life/${post.slug}/`} class="group block bg-white/70 backdrop-blur-sm border border-mint-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
             {post.data.cover && (
               <div class="overflow-hidden">
                 <img src={post.data.cover} alt={post.data.title} class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300" />

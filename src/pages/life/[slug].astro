@@ -3,6 +3,8 @@ import Layout from '../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 
+const base = import.meta.env.BASE_URL;
+
 export async function getStaticPaths() {
   const posts = await getCollection('posts', ({ data }) => 
     !data.draft && data.channel === 'life'
@@ -54,7 +56,7 @@ const nextPost = currentIndex < sortedPosts.length - 1 ? sortedPosts[currentInde
       {post.data.tags.length > 0 && (
         <div class="flex flex-wrap gap-2 mt-6">
           {post.data.tags.map((tag) => (
-            <a href={`/tags/${tag}`} class="px-3 py-1 bg-mint-50 text-mint-600 rounded-full text-sm hover:bg-mint-100 transition-colors">
+            <a href={`${base}tags/${tag}/`} class="px-3 py-1 bg-mint-50 text-mint-600 rounded-full text-sm hover:bg-mint-100 transition-colors">
               #{tag}
             </a>
           ))}
@@ -82,7 +84,7 @@ const nextPost = currentIndex < sortedPosts.length - 1 ? sortedPosts[currentInde
     <nav class="mt-12 pt-8 border-t border-mint-100">
       <div class="flex justify-between gap-4">
         {prevPost ? (
-          <a href={`/life/${prevPost.slug}`} class="group flex-1 p-4 bg-mint-50 rounded-xl hover:bg-mint-100 transition-colors">
+          <a href={`${base}life/${prevPost.slug}/`} class="group flex-1 p-4 bg-mint-50 rounded-xl hover:bg-mint-100 transition-colors">
             <p class="text-sm text-gray-400 mb-1">上一篇</p>
             <p class="text-mint-600 font-medium group-hover:text-mint-700">← {prevPost.data.title}</p>
           </a>
@@ -90,7 +92,7 @@ const nextPost = currentIndex < sortedPosts.length - 1 ? sortedPosts[currentInde
           <span></span>
         )}
         {nextPost ? (
-          <a href={`/life/${nextPost.slug}`} class="group flex-1 p-4 bg-mint-50 rounded-xl hover:bg-mint-100 transition-colors text-right">
+          <a href={`${base}life/${nextPost.slug}/`} class="group flex-1 p-4 bg-mint-50 rounded-xl hover:bg-mint-100 transition-colors text-right">
             <p class="text-sm text-gray-400 mb-1">下一篇</p>
             <p class="text-mint-600 font-medium group-hover:text-mint-700">{nextPost.data.title} →</p>
           </a>
