@@ -38,7 +38,7 @@
         console.log('Token found in URL, saving to localStorage...');
         
         // Decap CMS 使用 localStorage 存储用户信息
-        // 根据 Decap CMS 源码，格式应该是：{ token: 'xxx', backend: 'github' }
+        // 格式：{ token: 'xxx', backend: 'github' }
         try {
           const userData = {
             token: token,
@@ -47,13 +47,13 @@
           
           // 保存到 localStorage
           localStorage.setItem('netlify-cms-user', JSON.stringify(userData));
-          console.log('Token saved to localStorage');
+          console.log('Token saved to localStorage:', userData);
           
-          // 同时保存到 sessionStorage（某些情况下 Decap CMS 也会检查）
+          // 同时保存到 sessionStorage
           sessionStorage.setItem('netlify-cms-user', JSON.stringify(userData));
           
           // 清除 URL 中的 token 参数
-          const cleanUrl = window.location.pathname + window.location.hash.split('?')[0];
+          const cleanUrl = window.location.pathname + (window.location.hash.split('?')[0] || '');
           window.history.replaceState({}, document.title, cleanUrl);
           
           // 延迟刷新，确保 localStorage 已保存
@@ -62,18 +62,41 @@
           }, 100);
         } catch (e) {
           console.error('Failed to save token:', e);
-          alert('保存 token 失败，请检查浏览器控制台');
         }
-        return; // 如果有 token，不继续执行
+        return;
       }
       
-      // 如果没有 token，检查是否已有保存的用户信息
+      // 检查是否已有保存的用户信息
       const savedUser = localStorage.getItem('netlify-cms-user');
       if (savedUser) {
         try {
           const userData = JSON.parse(savedUser);
           if (userData.token) {
-            console.log('Found saved token in localStorage');
+            console.log('Found saved token in localStorage:', userData);
+            
+            // 等待 Decap CMS 加载完成后，手动触发认证
+            // Decap CMS 应该会自动读取，但我们可以确保它被读取
+            window.addEventListener('load', function() {
+              // 给 Decap CMS 一些时间初始化
+              setTimeout(function() {
+                // 检查 Decap CMS 是否已初始化
+                if (window.CMS && window.CMS.getBackend) {
+                  const backend = window.CMS.getBackend();
+                  if (backend) {
+                    console.log('Decap CMS backend initialized');
+                    // 尝试手动认证
+                    if (backend.authenticate) {
+                      backend.authenticate().then(function() {
+                        console.log('Authentication successful');
+                        window.location.reload();
+                      }).catch(function(err) {
+                        console.error('Authentication failed:', err);
+                      });
+                    }
+                  }
+                }
+              }, 1000);
+            });
           }
         } catch (e) {
           console.error('Failed to parse saved user data:', e);
