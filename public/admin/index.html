@@ -27,6 +27,18 @@
   <!-- Include the script that builds the page and powers Decap CMS -->
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
   <script>
+    // 全局错误处理，捕获未处理的 Promise 错误
+    window.addEventListener('unhandledrejection', function(event) {
+      // 忽略 "message port closed" 错误，这通常是浏览器扩展引起的
+      if (event.reason && event.reason.message && event.reason.message.includes('message port closed')) {
+        event.preventDefault();
+        console.warn('Ignored message port error (likely from browser extension)');
+        return;
+      }
+      // 其他错误正常处理
+      console.error('Unhandled promise rejection:', event.reason);
+    });
+    
     // 处理 OAuth 回调后的 token
     (function() {
       // 检查 URL 中的 token 参数
@@ -75,28 +87,41 @@
             console.log('Found saved token in localStorage:', userData);
             
             // 等待 Decap CMS 加载完成后，手动触发认证
-            // Decap CMS 应该会自动读取，但我们可以确保它被读取
-            window.addEventListener('load', function() {
-              // 给 Decap CMS 一些时间初始化
-              setTimeout(function() {
-                // 检查 Decap CMS 是否已初始化
-                if (window.CMS && window.CMS.getBackend) {
+            // 使用多种方式确保 Decap CMS 已初始化
+            function tryAuthenticate() {
+              // 检查 Decap CMS 是否已初始化
+              if (window.CMS) {
+                try {
                   const backend = window.CMS.getBackend();
-                  if (backend) {
-                    console.log('Decap CMS backend initialized');
-                    // 尝试手动认证
-                    if (backend.authenticate) {
-                      backend.authenticate().then(function() {
-                        console.log('Authentication successful');
-                        window.location.reload();
-                      }).catch(function(err) {
-                        console.error('Authentication failed:', err);
-                      });
-                    }
+                  if (backend && backend.authenticate) {
+                    console.log('Attempting to authenticate with Decap CMS...');
+                    backend.authenticate().then(function() {
+                      console.log('Authentication successful');
+                      // 不自动刷新，让 Decap CMS 自然显示界面
+                    }).catch(function(err) {
+                      console.warn('Authentication check failed (this may be normal):', err);
+                    });
+                  } else {
+                    console.log('Backend not ready yet, retrying...');
+                    setTimeout(tryAuthenticate, 500);
                   }
+                } catch (e) {
+                  console.warn('Error accessing backend:', e);
                 }
-              }, 1000);
-            });
+              } else {
+                // Decap CMS 还没加载，继续等待
+                setTimeout(tryAuthenticate, 500);
+              }
+            }
+            
+            // 在页面加载完成后开始尝试
+            if (document.readyState === 'complete') {
+              setTimeout(tryAuthenticate, 1000);
+            } else {
+              window.addEventListener('load', function() {
+                setTimeout(tryAuthenticate, 1000);
+              });
+            }
           }
         } catch (e) {
           console.error('Failed to parse saved user data:', e);
