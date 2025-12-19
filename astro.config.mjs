@@ -6,7 +6,7 @@ import tailwind from '@astrojs/tailwind';
 export default defineConfig({
   integrations: [mdx(), tailwind()],
   site: 'https://xinyi-jane.github.io',
-  base: '/',
+  base: '/blog/',
   output: 'static',
 });
 
