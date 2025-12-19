@@ -1,0 +1,44 @@
+---
+// 重定向到 public/admin/index.html
+// 在开发环境中，直接返回 admin 页面内容
+---
+
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>内容管理</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+    #nc-root {
+      min-height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <div id="nc-root" class="loading">正在加载内容管理系统...</div>
+  
+  <!-- Include the script that builds the page and powers Decap CMS -->
+  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+  <script>
+    // Decap CMS 会自动从 /admin/config.yml 加载配置
+    // 如果看到这个页面但没有内容，请检查：
+    // 1. 是否已启动 decap-server（npx decap-server）
+    // 2. config.yml 中的 proxy_url 是否正确（http://localhost:8081/api/v1）
+    // 3. 浏览器控制台是否有错误信息
+    // 4. 确保访问的是 http://localhost:4321/admin（不是 /admin/）
+  </script>
+</body>
+</html>
+

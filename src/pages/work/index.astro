@@ -1,0 +1,63 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+const allPosts = await getCollection('posts', ({ data }) => 
+  !data.draft && data.channel === 'work'
+);
+
+const sortedPosts = allPosts.sort((a, b) => 
+  b.data.date.getTime() - a.data.date.getTime()
+);
+---
+
+<Layout title="工作" description="工作频道 - 分享工作中的思考与经验">
+  <div>
+    <div class="mb-12">
+      <div class="flex items-center gap-4 mb-4">
+        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-sky-200 to-sky-300 flex items-center justify-center text-3xl">
+          💼
+        </div>
+        <div>
+          <h1 class="text-4xl font-bold text-gray-800">工作</h1>
+          <p class="text-gray-500 mt-1">分享工作中的思考与经验</p>
+        </div>
+      </div>
+    </div>
+    {sortedPosts.length === 0 ? (
+      <div class="text-center py-16">
+        <p class="text-gray-400 text-lg">暂无文章</p>
+      </div>
+    ) : (
+      <div class="grid md:grid-cols-2 gap-6">
+        {sortedPosts.map((post) => (
+          <a href={`/work/${post.slug}`} class="group block bg-white/70 backdrop-blur-sm border border-sky-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+            {post.data.cover && (
+              <div class="overflow-hidden">
+                <img src={post.data.cover} alt={post.data.title} class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300" />
+              </div>
+            )}
+            <div class="p-6">
+              <div class="flex items-center gap-2 mb-3">
+                <time class="text-xs text-gray-400">{post.data.date.toLocaleDateString('zh-CN')}</time>
+                {post.data.tags.length > 0 && (
+                  <div class="flex gap-2">
+                    {post.data.tags.slice(0, 2).map((tag) => (
+                      <span class="px-2 py-1 bg-sky-50 text-sky-600 rounded-full text-xs font-medium">{tag}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <h2 class="text-xl font-bold mb-2 text-gray-800 group-hover:text-sky-600 transition-colors">{post.data.title}</h2>
+              {post.data.description && (
+                <p class="text-gray-600 text-sm mb-4 line-clamp-2">{post.data.description}</p>
+              )}
+              <p class="text-sm text-sky-500 font-medium group-hover:translate-x-2 transition-transform inline-block">阅读更多 →</p>
+            </div>
+          </a>
+        ))}
+      </div>
+    )}
+  </div>
+</Layout>
+

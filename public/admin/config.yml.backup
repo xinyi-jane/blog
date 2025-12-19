@@ -1,0 +1,44 @@
+backend:
+  name: github
+  repo: yourusername/your-repo # 替换为你的 GitHub 仓库路径，格式：username/repo-name
+  branch: main # 分支名称
+  base_url: https://your-oauth-proxy.vercel.app # 替换为你的 OAuth 代理服务地址
+  auth_endpoint: api/auth
+
+media_folder: public/images
+public_folder: /images
+
+collections:
+  - name: "posts"
+    label: "文章"
+    folder: "src/content/posts"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "标题", name: "title", widget: "string", required: true }
+      - { label: "日期", name: "date", widget: "datetime", required: true }
+      - { 
+          label: "频道", 
+          name: "channel", 
+          widget: "select", 
+          options: ["life", "work"],
+          required: true 
+        }
+      - { label: "标签", name: "tags", widget: "list", required: false }
+      - { label: "描述", name: "description", widget: "string", required: false }
+      - { label: "草稿", name: "draft", widget: "boolean", default: false, required: false }
+      - { label: "封面图", name: "cover", widget: "image", required: false }
+      - { label: "图片集", name: "gallery", widget: "list", fields: [{ label: "图片", name: "image", widget: "image" }], required: false }
+      - { label: "正文", name: "body", widget: "markdown", required: true }
+
+  - name: "updates"
+    label: "动态"
+    folder: "src/content/updates"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    fields:
+      - { label: "日期", name: "date", widget: "datetime", required: true }
+      - { label: "标题", name: "title", widget: "string", required: false }
+      - { label: "图片", name: "images", widget: "list", fields: [{ label: "图片", name: "image", widget: "image" }], required: false }
+      - { label: "草稿", name: "draft", widget: "boolean", default: false, required: false }
+      - { label: "正文", name: "body", widget: "markdown", required: true }
