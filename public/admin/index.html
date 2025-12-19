@@ -27,18 +27,32 @@
   <!-- Include the script that builds the page and powers Decap CMS -->
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
   <script>
-    // Decap CMS 会自动从 /admin/config.yml 加载配置
-    // 并自动处理 URL 中的 token 参数（OAuth 回调后）
-    
-    // 如果登录后仍然显示登录界面，请尝试：
-    // 1. 清除浏览器缓存和 localStorage
-    //    - 打开浏览器开发者工具 (F12)
-    //    - Application/存储 > Local Storage > 清除所有
-    //    - 刷新页面
-    // 2. 检查浏览器控制台的错误信息
-    // 3. 确认 OAuth 配置正确（见 START_HERE.md）
-    // 4. 确认 config.yml 中的 base_url 和 repo 配置正确
-    // 5. 确认 Vercel 环境变量已正确设置
+    // 处理 OAuth 回调后的 token
+    (function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
+      
+      if (token) {
+        // Decap CMS 使用 localStorage 存储用户信息
+        // 格式：{ token: 'xxx', backend: 'github' }
+        try {
+          const userData = {
+            token: token,
+            backend: 'github'
+          };
+          localStorage.setItem('netlify-cms-user', JSON.stringify(userData));
+          
+          // 清除 URL 中的 token 参数
+          const newUrl = window.location.pathname;
+          window.history.replaceState({}, document.title, newUrl);
+          
+          // 刷新页面以让 Decap CMS 读取新的 token
+          window.location.reload();
+        } catch (e) {
+          console.error('Failed to save token:', e);
+        }
+      }
+    })();
   </script>
 </body>
 </html>
