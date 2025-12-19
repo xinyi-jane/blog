@@ -6,7 +6,8 @@ import tailwind from '@astrojs/tailwind';
 export default defineConfig({
   integrations: [mdx(), tailwind()],
   site: 'https://xinyi-jane.github.io',
-  base: '/blog/',
+  // 开发环境不使用 base 路径，生产环境使用 /blog/
+  base: import.meta.env.DEV ? '/' : '/blog/',
   output: 'static',
 });
 
