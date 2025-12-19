@@ -1,9 +1,20 @@
-# 本地开发模式配置（用于测试 CMS 界面）
-# 使用方法：将 config.yml 重命名为 config.yml.backup，然后将此文件重命名为 config.yml
+# Decap CMS 配置
+# 部署到 GitHub Pages 后，需要使用 GitHub backend
 
 backend:
-  name: proxy
-  proxy_url: http://localhost:8081/api/v1
+  name: github
+  repo: xinyi-jane/blog  # 你的 GitHub 仓库
+  branch: main
+  # ⚠️ 重要：部署 OAuth 代理服务后，填入你的 Vercel 应用 URL
+  # 例如：base_url: https://blog-cms-oauth.vercel.app
+  # 如果还没有部署，先使用占位符，部署后再更新
+  base_url: https://blog-cms-oauth.vercel.app
+  auth_endpoint: api/auth
+
+# 本地开发模式（用于本地测试，取消注释下面的配置并注释掉上面的 github backend）
+# backend:
+#   name: proxy
+#   proxy_url: http://localhost:8081/api/v1
 
 media_folder: public/images
 public_folder: /images

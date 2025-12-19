@@ -21,7 +21,7 @@ export const GET: APIRoute = async (context) => {
   return rss({
     title: '我的博客',
     description: '个人博客 - 记录生活与工作的点滴',
-    site: context.site || 'https://yourusername.github.io',
+    site: context.site || 'https://xinyi-jane.github.io',
     items: allItems.map((item) => {
       if (item.type === 'post') {
         return {

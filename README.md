@@ -74,13 +74,8 @@ npm run preview
 编辑 `astro.config.mjs`，修改 `site` 字段为你的 GitHub Pages URL：
 
 ```js
-site: 'https://yourusername.github.io',
-```
-
-如果仓库名不是 `username.github.io`，还需要设置 `base`：
-
-```js
-base: '/your-repo-name/',
+site: 'https://xinyi-jane.github.io',
+base: '/blog/',  // 如果仓库名不是 username.github.io，需要设置 base
 ```
 
 ### 2. 配置 Decap CMS
@@ -90,28 +85,42 @@ base: '/your-repo-name/',
 1. 更新 `repo` 为你的 GitHub 仓库路径（格式：`username/repo-name`）
 2. 更新 `base_url` 为你的 OAuth 代理服务地址（见下方 OAuth 配置）
 
-### 3. 配置 OAuth 代理服务
+**当前配置：**
+- repo: `xinyi-jane/blog`
+- base_url: `https://blog-cms-oauth.vercel.app`
+- auth_endpoint: `api/auth`
+
+### 3. 配置 OAuth 代理服务（在线发布必需）
 
 由于 GitHub Pages 不能运行后端服务，需要单独部署 OAuth 代理。
 
-#### 选项 A：使用 Vercel（推荐）
+**详细配置步骤请查看：**
+- **[START_HERE.md](./START_HERE.md)** - 快速开始指南（推荐）
+- **[QUICK_START_OAUTH.md](./QUICK_START_OAUTH.md)** - 详细配置步骤
+- **[OAUTH_CHECKLIST.md](./OAUTH_CHECKLIST.md)** - 配置检查清单
 
-1. 在 Vercel 创建新项目，连接你的 GitHub 仓库
-2. 在 Vercel 项目设置中添加环境变量：
-   - `GITHUB_CLIENT_ID`：GitHub OAuth App 的 Client ID
-   - `GITHUB_CLIENT_SECRET`：GitHub OAuth App 的 Client Secret
-   - `OAUTH_REDIRECT_URI`：OAuth 回调地址（通常是 `https://your-vercel-app.vercel.app/api/auth?provider=github`）
+**快速步骤：**
 
-3. 在 GitHub 创建 OAuth App：
-   - 访问 https://github.com/settings/developers
-   - 点击 "New OAuth App"
-   - Authorization callback URL 设置为：`https://your-vercel-app.vercel.app/api/auth?provider=github`
+1. **创建 GitHub OAuth App**
+   - 访问：https://github.com/settings/developers
+   - 创建新的 OAuth App
+   - 回调 URL：`https://blog-cms-oauth.vercel.app/api/auth?provider=github`
 
-4. 更新 `public/admin/config.yml` 中的 `base_url` 为你的 Vercel 应用地址
+2. **部署 OAuth 代理到 Vercel**
+   ```bash
+   vercel login
+   vercel --prod
+   ```
 
-#### 选项 B：使用 Cloudflare Workers
+3. **配置 Vercel 环境变量**
+   - `GITHUB_CLIENT_ID`
+   - `GITHUB_CLIENT_SECRET`
+   - `OAUTH_REDIRECT_URI`: `https://blog-cms-oauth.vercel.app/api/auth?provider=github`
+   - `ADMIN_URL`: `https://xinyi-jane.github.io/blog/admin/`
 
-类似地，可以将 `api/auth.js` 部署到 Cloudflare Workers。
+4. **更新 `public/admin/config.yml` 中的 `base_url`**
+
+**注意**：如果不配置 OAuth，也可以通过本地编辑 Markdown 文件的方式发布内容。
 
 ### 4. 配置 GitHub Actions
 
@@ -121,20 +130,20 @@ base: '/your-repo-name/',
 
 ## 使用说明
 
-### 发布文章
+### 在线发布文章（需要配置 OAuth）
 
-1. 访问 `/admin` 进入 Decap CMS 后台
-2. 使用 GitHub 账号登录
+1. 访问 `https://xinyi-jane.github.io/blog/admin/` 进入 Decap CMS 后台
+2. 点击 "Login with GitHub" 使用 GitHub 账号登录
 3. 选择 "文章" 或 "动态" 集合
-4. 点击 "New [文章/动态]"
+4. 点击 "New [文章/动态]" 按钮
 5. 填写内容并上传图片
 6. 点击 "Publish" 发布
 
-发布后，GitHub Actions 会自动构建并部署到 GitHub Pages。
+发布后，GitHub Actions 会自动构建并部署到 GitHub Pages（通常 2-5 分钟）。
 
-### 本地写作
+### 本地写作（无需 OAuth）
 
-你也可以直接在 `src/content/posts/` 或 `src/content/updates/` 目录下创建 Markdown 文件。
+你也可以直接在 `src/content/posts/` 或 `src/content/updates/` 目录下创建 Markdown 文件，然后提交到 GitHub。
 
 文章 frontmatter 示例：
 
@@ -183,14 +192,37 @@ draft: false
 详细的部署步骤请查看 **[DEPLOY.md](./DEPLOY.md)** 文件。
 
 **快速步骤：**
-1. 在 GitHub 创建仓库
+1. 在 GitHub 创建仓库（例如：`xinyi-jane/blog`）
 2. 初始化本地 Git 并推送代码
 3. 在仓库设置中启用 GitHub Pages（选择 GitHub Actions）
 4. 等待自动部署完成
 
+**当前配置：**
+- 仓库：`xinyi-jane/blog`
+- 网站 URL：`https://xinyi-jane.github.io/blog/`
+- 部署方式：GitHub Actions 自动部署
+
 ### 其他平台
 
 你也可以将构建后的 `dist/` 目录部署到任何静态网站托管服务（Vercel、Netlify、Cloudflare Pages 等）。
+
+## OAuth 配置（在线发布）
+
+如果你想要通过网页端直接发布内容，需要配置 OAuth：
+
+**相关文档：**
+- **[START_HERE.md](./START_HERE.md)** ⭐ - 快速开始（3 步完成）
+- **[QUICK_START_OAUTH.md](./QUICK_START_OAUTH.md)** - 详细配置步骤
+- **[OAUTH_CHECKLIST.md](./OAUTH_CHECKLIST.md)** - 配置检查清单
+- **[FINAL_STEPS.md](./FINAL_STEPS.md)** - 最后步骤指南
+
+**当前 OAuth 配置：**
+- OAuth 代理：Vercel (`blog-cms-oauth`)
+- 代理 URL：`https://blog-cms-oauth.vercel.app`
+- Admin 页面：`https://xinyi-jane.github.io/blog/admin/`
+
+**如果不想配置 OAuth：**
+你可以直接在本地编辑 Markdown 文件，然后提交到 GitHub，同样可以发布内容。
 
 ## 技术栈
 
@@ -199,6 +231,15 @@ draft: false
 - [Tailwind CSS](https://tailwindcss.com/) - CSS 框架
 - [GitHub Pages](https://pages.github.com/) - 静态网站托管
 - [GitHub Actions](https://github.com/features/actions) - CI/CD
+- [Vercel](https://vercel.com/) - OAuth 代理服务托管
+
+## 相关文档
+
+- **[DEPLOY.md](./DEPLOY.md)** - GitHub Pages 部署指南
+- **[START_HERE.md](./START_HERE.md)** - OAuth 配置快速开始
+- **[QUICK_START_OAUTH.md](./QUICK_START_OAUTH.md)** - OAuth 详细配置
+- **[OAUTH_CHECKLIST.md](./OAUTH_CHECKLIST.md)** - OAuth 配置检查清单
+- **[ADMIN_TROUBLESHOOTING.md](./ADMIN_TROUBLESHOOTING.md)** - Admin 后台问题排查
 
 ## 许可证
 
